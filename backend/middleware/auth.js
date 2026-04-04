@@ -13,7 +13,10 @@ async function requireAuth(req, res, next) {
   const token = authHeader.split(' ')[1];
   const { data: { user }, error } = await supabase.auth.getUser(token);
   if (error || !user) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    const errMsg = error ? error.message : (!user ? 'No user found in response' : 'Unknown token error');
+    return res.status(401).json({ 
+      error: `Auth Failed: ${errMsg} (Check Railway ENV: URL starts with ${process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0,5) : 'NULL'})` 
+    });
   }
   req.user = user;
   req.supabase = supabase;
